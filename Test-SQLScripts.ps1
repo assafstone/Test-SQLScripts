@@ -105,6 +105,9 @@ begin {
         }
     }
 
+    function Get-StatementText ($statement) {
+        -join (($statement.ScriptTokenStream | Where-Object {$_.Line -eq $statement.StartLine -and $_.Column -in $statement.StartColumn..$($statement.StartColumn + $statement.FragmentLength) -and $_.Text -ne "`r`n" }).Text.ToUpper())
+    }
     function Get-Statement ($Statement, $Keys) {
         $StatementObject = [PSCustomObject] @{
             PSTypeName = "Parser.DOM.Statement"
@@ -116,6 +119,8 @@ begin {
             IsQualified = $false
             OnObjectSchema = $null
             OnObjectName = $null
+            Text = Get-StatementText $Statement
+            LineNumber = $Statement.StartLine
         }
         
         Add-Member -InputObject $StatementObject -Type ScriptMethod -Name ToString -Value { $this.psobject.typenames[0] } -Force
@@ -257,9 +262,6 @@ process {
             ForEach ($s in $b.Statements) {
                 $TotalStatements++
                 $StatementObject = Get-Statement $s $ParserKeys
-
-                Add-Member -InputObject $StatementObject -NotePropertyMembers @{ Content = Get-StatementLine $f $s } -Force
-                Add-Member -InputObject $StatementObject -NotePropertyMembers @{ LineNumber = $s.StartLine } -Force
 
                 $BatchObject.Statements += $StatementObject
             }
