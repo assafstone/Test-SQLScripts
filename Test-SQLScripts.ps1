@@ -158,6 +158,10 @@ begin {
 
     }
 
+    function Get-StatementLine ($f, $s) {
+        (Get-Content -Path $f -Raw).Substring($s.StartOffset, $s.FragmentLength)
+    }
+
     $LibraryLoaded = $false
     $ObjectCreated = $false
     $LibraryVersions = @(13,12,11)
@@ -248,6 +252,9 @@ process {
             ForEach ($s in $b.Statements) {
                 $TotalStatements++
                 $StatementObject = Get-Statement $s $ParserKeys
+
+                Add-Member -InputObject $StatementObject -NotePropertyMembers @{ Content = Get-StatementLine $f $s } -Force
+                Add-Member -InputObject $StatementObject -NotePropertyMembers @{ LineNumber = $s.StartLine } -Force
 
                 $BatchObject.Statements += $StatementObject
             }
