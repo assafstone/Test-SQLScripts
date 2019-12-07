@@ -82,6 +82,7 @@ begin {
     $ParserKeys += New-Object Parserkey ("DeleteStatement","DeleteSpecification.Target.SchemaObject")
     $ParserKeys += New-Object Parserkey ("AlterTableAddTableElementStatement","SchemaObjectName")
     $ParserKeys += New-Object Parserkey ("AlterTableDropTableElementStatement","SchemaObjectName")
+    $ParserKeys += New-Object Parserkey ("AlterTableAlterColumnStatement","SchemaObjectName")
     $ParserKeys += New-Object Parserkey ("DropIndexStatement","DropIndexClauses.Object")
     $ParserKeys += New-Object Parserkey ("CreateIndexStatement","OnName")
     $ParserKeys += New-Object Parserkey ("CreateProcedureStatement","ProcedureReference.Name")
