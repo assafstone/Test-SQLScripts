@@ -142,11 +142,11 @@ begin {
             $Property = $Statement
             $ObjectType = ($Keys | Where-Object {$_.ObjectType -eq $Statement.gettype().name}).ObjectType
             Write-Verbose "Object type: $ObjectType"
-            if ($ObjectType -eq "UpdateStatement" -and $statement.UpdateSpecification.WhereClause -ne $null -and $statement.UpdateSpecification.SetClauses -ne $null) {
+            if ($ObjectType -eq "UpdateStatement" -and $null -ne $statement.UpdateSpecification.WhereClause -and $null -ne $statement.UpdateSpecification.SetClauses) {
                 $SchemaObject = Get-UpdatedTableFromReferences $Statement.UpdateSpecification.FromClause.TableReferences.FirstTableReference
                 $StatementObject.OnObjectSchema = $SchemaObject.SchemaIdentifier.Value
                 $StatementObject.OnObjectName = $SchemaObject.BaseIdentifier.Value
-            } elseif ($ObjectType -eq "SelectStatement" -and $statement.Queryexpression.fromclause.tablereferences.FirstTableReference -ne $null) {
+            } elseif ($ObjectType -eq "SelectStatement" -and $null -ne $statement.Queryexpression.fromclause.tablereferences.FirstTableReference) {
                 $SchemaObject = Get-UpdatedTableFromReferences $statement.Queryexpression.fromclause.tablereferences.FirstTableReference
                 $StatementObject.OnObjectSchema = $SchemaObject.SchemaIdentifier.Value
                 $StatementObject.OnObjectName = $SchemaObject.BaseIdentifier.Value
@@ -228,7 +228,7 @@ process {
         $Fragment = $Parser.Parse($Reader, [ref] $Errors)
 
         [bool] $HasErrors = $false
-        if ($Errors -ne $null) {
+        if ($null -ne $Errors) {
             [bool] $HasErrors = $true
         }
 
