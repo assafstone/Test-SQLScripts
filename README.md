@@ -37,3 +37,6 @@ In the TestScripts sub-folder in this repository, I have some quick SQL Scripts 
 
 ## Extending the tests
 To simplify adding new statement parsing, check out the ParserKey class I added to the script. All the tests and objects it looks for are defined as a class that is checks against. This will probably be changed to JSON soon, but for now this is how I'm handling the different statement types.
+
+### Extending the parser
+To add a parser, visit the [DOM's documentation page](https://docs.microsoft.com/en-us/dotnet/api/microsoft.sqlserver.transactsql.scriptdom).
