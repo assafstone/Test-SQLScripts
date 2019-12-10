@@ -1,4 +1,13 @@
-Describe "Verify SQL scripts do not allow for breaking changes" {
+# Add items to the $verifcationTests hashtable, in order to add tests. 
+# The hash's key is the Microsoft.SqlServer.TransactSql.ScriptDom.TSqlStatement descendant class we are checking, and the value is the Pester test assumption
+# If you add a statement-type and get a Parser Key missing warning, add it to the Get-SqlServerDomParserKeys function.
+$verifcationTests = @{
+    AlterTableAlterColumnStatement      = "The script does not alter the column of any tables";
+    AlterTableDropTableElementStatement = "The script does not drop any table elements";
+    DropTableStatement                  = "The script does not drop any tables";
+}
+
+Describe "When migrating SQL schema changes to the database" {
     Import-Module .\Modules\SqlScriptParser\Get-SqlServerDomParserKeys.psm1
     Import-Module .\Modules\SqlScriptParser\Invoke-SqlScriptParser.psm1
     
@@ -6,6 +15,21 @@ Describe "Verify SQL scripts do not allow for breaking changes" {
     Install-Module -Name Assert -Scope CurrentUser -SkipPublisherCheck
     Import-Module Assert
     
+    function Test-ViolatingStatements {
+        param (
+            [Parameter(Mandatory = $true)][string] $StatementType
+        )
+        $found = $statements | Where-Object StatementType -Like $StatementType
+
+        if ($found) {
+            $customMessage = "Found $($found.Count) instances of $($found[0].StatementType):"
+            foreach ($item in $found) {
+                $customMessage = $customMessage + "`r`n`ton line #$($item.LineNumber): $($item.Text)"
+            }
+        }
+        $found.Count | Assert-Equal -Expected 0 -CustomMessage $customMessage
+    }
+
     if (!$Env:Files) {
         $Env:Files = $null
     }
@@ -23,39 +47,9 @@ Describe "Verify SQL scripts do not allow for breaking changes" {
 
     $statements = $results.Batches.Statements
 
-    It "The script does not alter the column of any tables" {
-        $found = $statements | Where-Object StatementType -Like "AlterTableAlterColumnStatement"
-
-        if ($found) {
-            $customMessage = "Found $($found.Count) instances of $($found[0].StatementType):"
-            foreach ($item in $found) {
-                $customMessage = $customMessage + "`r`n`ton line #$($item.LineNumber): $($item.Text)"
-            }
+    $verifcationTests.Keys | ForEach-Object {
+        It $verifcationTests.Item($_) {
+            Test-ViolatingStatements -StatementType $_
         }
-        $found.Count | Assert-Equal -Expected 0 -CustomMessage $customMessage
-    }
-
-    It "The script does not drop elements of a table" {
-        $found = $statements | Where-Object StatementType -Like "AlterTableDropTableElementStatement"
-
-        if ($found) {
-            $customMessage = "Found $($found.Count) instances of $($found[0].StatementType):"
-            foreach ($item in $found) {
-                $customMessage = $customMessage + "`r`n`ton line #$($item.LineNumber): $($item.Text)"
-            }
-        }
-        $found.Count | Assert-Equal -Expected 0 -CustomMessage $customMessage
-    }
-
-    It "The script does not drop tables" {
-        $found = $statements | Where-Object StatementType -Like "DropTableStatement"
-
-        if ($found) {
-            $customMessage = "Found $($found.Count) instances of $($found[0].StatementType):"
-            foreach ($item in $found) {
-                $customMessage = $customMessage + "`r`n`ton line #$($item.LineNumber): $($item.Text)"
-            }
-        }
-        $found.Count | Assert-Equal -Expected 0 -CustomMessage $customMessage
     }
 }
