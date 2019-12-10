@@ -1,7 +1,9 @@
 Describe "Verify SQL scripts do not allow for breaking changes" {
     Import-Module .\Modules\SqlScriptParser\Get-SqlServerDomParserKeys.psm1
     Import-Module .\Modules\SqlScriptParser\Invoke-SqlScriptParser.psm1
-    Install-Module -Name Assert
+    
+    Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
+    Install-Module -Name Assert -Scope CurrentUser -SkipPublisherCheck
     Import-Module Assert
     
     if (!$Env:Files) {
@@ -35,6 +37,18 @@ Describe "Verify SQL scripts do not allow for breaking changes" {
 
     It "The script does not drop elements of a table" {
         $found = $statements | Where-Object StatementType -Like "AlterTableDropTableElementStatement"
+
+        if ($found) {
+            $customMessage = "Found $($found.Count) instances of $($found[0].StatementType):"
+            foreach ($item in $found) {
+                $customMessage = $customMessage + "`r`n`ton line #$($item.LineNumber): $($item.Text)"
+            }
+        }
+        $found.Count | Assert-Equal -Expected 0 -CustomMessage $customMessage
+    }
+
+    It "The script does not drop tables" {
+        $found = $statements | Where-Object StatementType -Like "DropTableStatement"
 
         if ($found) {
             $customMessage = "Found $($found.Count) instances of $($found[0].StatementType):"
