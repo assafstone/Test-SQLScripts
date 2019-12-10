@@ -10,6 +10,7 @@ param(
     [Parameter(Mandatory = $false)] [string] $UseQuotedIdentifier = $true
 )
 
+Import-Module .\Modules\SqlScriptParser\Get-SqlServerDomParserKeys.psm1
 Import-Module .\Modules\SqlScriptParser\Invoke-SqlScriptParser.psm1
 
 $Files | Invoke-SqlScriptParser `

@@ -34,23 +34,25 @@ You can extend the tests by adding a new [ParserKey] object to the $ParserKeys a
 but I expect them to be an external json file at some point.
 
 Original Author: Drew Furgiuele (@pittfurg, port1433.com)
+Forked and modified by: Assaf Stone (@assafstone, devmanwalking.com)
 Tags: T-SQL, Parser
     
 .LINK
 
 .EXAMPLE
-$Results = Get-ChildItem -Path C:\Scripts | ./Test-SQLScripts.ps1
+$Results = Get-ChildItem -Path C:\Scripts | Invoke-SqlScriptParser
 
 Execute the parser against a list of files returned from the Get-ChildItem cmdlet and store the returned object in the $Results variable
 
 .EXAMPLE
-$Results = Get-ChildItem -Path C:\Scripts | ./Test-SQLScripts.ps1 -PathToScriptDomLibrary "C:\Program Files (x86)\Microsoft SQL Server\130\SDK\Assemblies\Microsoft.SqlServer.TransactSql.ScriptDom.dll"
+$Results = Get-ChildItem -Path C:\Scripts | Invoke-SqlScriptParser -PathToScriptDomLibrary "C:\Program Files (x86)\Microsoft SQL Server\130\SDK\Assemblies\Microsoft.SqlServer.TransactSql.ScriptDom.dll"
 
 Same as above example, but manually point to where the parser library is stored (useful for hosts that don't have SQL Server installed and you manually
 copied the library to it).
 
 
 #>
+
 function Invoke-SqlScriptParser {
     [cmdletbinding()]
     param(
@@ -66,36 +68,6 @@ function Invoke-SqlScriptParser {
 
 
     begin {
-        $ParserKeys = @()
-
-        Class ParserKey {
-            [string] $ObjectType
-            [string] $SchemaSpecification
-            ParserKey ([string] $ObjectType, [string] $SchemaSpecification) {
-                $this.ObjectType = $ObjectType
-                $this.SchemaSpecification = $SchemaSpecification
-            }
-        }
-
-        $ParserKeys += New-Object Parserkey ("PredicateSetStatement", "Options")
-        $ParserKeys += New-Object Parserkey ("PrintStatement", "Expression")
-        $ParserKeys += New-Object Parserkey ("ExecuteStatement", "ExecuteSpecification.ExecutableEntity")
-        $ParserKeys += New-Object Parserkey ("SelectStatement", "Queryexpression.Fromclause.Tablereferences.Schemaobject")
-        $ParserKeys += New-Object Parserkey ("InsertStatement", "InsertSpecification.Target.SchemaObject")
-        $ParserKeys += New-Object Parserkey ("UpdateStatement", "UpdateSpecification.Target.SchemaObject")
-        $ParserKeys += New-Object Parserkey ("DeleteStatement", "DeleteSpecification.Target.SchemaObject")
-        $ParserKeys += New-Object Parserkey ("AlterTableAddTableElementStatement", "SchemaObjectName")
-        $ParserKeys += New-Object Parserkey ("AlterTableDropTableElementStatement", "SchemaObjectName")
-        $ParserKeys += New-Object Parserkey ("AlterTableAlterColumnStatement", "SchemaObjectName")
-        $ParserKeys += New-Object Parserkey ("AlterViewStatement", "SchemaObjectName")
-        $ParserKeys += New-Object Parserkey ("DropIndexStatement", "DropIndexClauses.Object")
-        $ParserKeys += New-Object Parserkey ("CreateIndexStatement", "OnName")
-        $ParserKeys += New-Object Parserkey ("CreateProcedureStatement", "ProcedureReference.Name")
-        $ParserKeys += New-Object Parserkey ("CreateTableStatement", "SchemaObjectName")
-        $ParserKeys += New-Object Parserkey ("DropProcedureStatement", "Objects")
-        $ParserKeys += New-Object Parserkey ("DropTableStatement", "Objects")
-    
-
         function Get-UpdatedTableFromReferences($TableReference) {
             Write-Verbose "Looks like a joined DML statement, need to get into the references..."
             if ($TableReference.FirstTableReference) {
@@ -175,9 +147,7 @@ function Invoke-SqlScriptParser {
 
         }
 
-        function Get-StatementLine ($f, $s) {
-            (Get-Content -Path $f -Raw).Substring($s.StartOffset, $s.FragmentLength)
-        }
+        $ParserKeys = Get-SqlServerDomParserKeys
 
         $LibraryLoaded = $false
         $ObjectCreated = $false
