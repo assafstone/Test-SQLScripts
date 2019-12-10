@@ -30,7 +30,6 @@ Describe "Verify SQL scripts do not allow for breaking changes" {
                 $customMessage = $customMessage + "`r`n`ton line #$($item.LineNumber): $($item.Text)"
             }
         }
-        # $found | Should -BeNullOrEmpty -because "Line #$($found.LineNumber): $($found.Text)"
         $found.Count | Assert-Equal -Expected 0 -CustomMessage $customMessage
     }
 
@@ -43,7 +42,6 @@ Describe "Verify SQL scripts do not allow for breaking changes" {
                 $customMessage = $customMessage + "`r`n`ton line #$($item.LineNumber): $($item.Text)"
             }
         }
-        # $found | Should -BeNullOrEmpty -because "Line #$($found.LineNumber): $($found.Text)"
         $found.Count | Assert-Equal -Expected 0 -CustomMessage $customMessage
     }
 }
