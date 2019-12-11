@@ -17,6 +17,7 @@ function Get-SqlServerDomParserKeys {
     $ParserKeys += New-Object Parserkey ("InsertStatement", "InsertSpecification.Target.SchemaObject")
     $ParserKeys += New-Object Parserkey ("UpdateStatement", "UpdateSpecification.Target.SchemaObject")
     $ParserKeys += New-Object Parserkey ("DeleteStatement", "DeleteSpecification.Target.SchemaObject")
+    $ParserKeys += New-Object Parserkey ("AlterDatabaseSetStatement", "DatabaseName")
     $ParserKeys += New-Object Parserkey ("AlterTableAddTableElementStatement", "SchemaObjectName")
     $ParserKeys += New-Object Parserkey ("AlterTableDropTableElementStatement", "SchemaObjectName")
     $ParserKeys += New-Object Parserkey ("AlterTableAlterColumnStatement", "SchemaObjectName")
