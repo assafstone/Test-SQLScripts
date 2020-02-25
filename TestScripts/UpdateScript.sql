@@ -1,1 +1,0 @@
-UPDATE Person.Person SET ModifiedDate = GETDATE()
