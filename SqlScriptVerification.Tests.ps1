@@ -1,13 +1,13 @@
 # Add items to the $verificationTests hashtable, in order to add tests. 
 # The hash's key is the Microsoft.SqlServer.TransactSql.ScriptDom.TSqlStatement descendant class we are checking, and the value is the Pester test assumption
 # If you add a statement-type and get a Parser Key missing warning, add it to the Get-SqlServerDomParserKeys function.
-$violations = @(
-    @{violation = 'AlterTableAlterColumnStatement'}, 
-    @{violation = 'AlterTableDropTableElementStatement'}, 
-    @{violation = 'DropTableStatement'}
-)
 
 Describe "When migrating SQL schema changes to the database" {
+    $violations = @(
+        @{violation = 'AlterTableAlterColumnStatement'; reason = 'it should not break backwards compatibility'}, 
+        @{violation = 'AlterTableDropTableElementStatement'; reason = 'it should not risk data loss'}, 
+        @{violation = 'DropTableStatement'; reason = 'it should not risk data loss'}
+    )
     
     Import-Module $PSScriptRoot/Modules/SqlScriptParser/Get-SqlServerDomParserKeys.psm1
     Import-Module $PSScriptRoot/Modules/SqlScriptParser/Invoke-SqlScriptParser.psm1
@@ -32,11 +32,11 @@ Describe "When migrating SQL schema changes to the database" {
     -PathToScriptDomLibrary $Env:PathToScriptDomLibrary `
     -UseQuotedIdentifier $Env:UseQuotedIdentifier
     
-    $statements = $results.Batches.Statements
+    $script:statements = $results.Batches.Statements
    
-    It 'The script should not have a \<violation\> statement' -TestCases $violations {
-        param ($violation)
-        $found = $statements | Where-Object StatementType -Like $violation
+    It "The script should not have '<violation>' statements, because <reason>." -TestCases $violations {
+        param ($violation, $reason)
+        $found = $script:statements | Where-Object StatementType -Like $violation
     
         if ($found) {
             $customMessage = "Found $($found.Count) instances of $($found[0].StatementType):"
