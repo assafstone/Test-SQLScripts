@@ -11,6 +11,7 @@ function Get-SqlServerDomParserKeys {
     $ParserKeys = @()
 
     $ParserKeys += New-Object Parserkey ("PredicateSetStatement", "Options")
+    $ParserKeys += New-Object Parserkey ("SetIdentityInsertStatement", "Table")
     $ParserKeys += New-Object Parserkey ("PrintStatement", "Expression")
     $ParserKeys += New-Object Parserkey ("ExecuteStatement", "ExecuteSpecification.ExecutableEntity")
     $ParserKeys += New-Object Parserkey ("SelectStatement", "Queryexpression.Fromclause.Tablereferences.Schemaobject")
@@ -28,7 +29,9 @@ function Get-SqlServerDomParserKeys {
     $ParserKeys += New-Object Parserkey ("CreateTableStatement", "SchemaObjectName")
     $ParserKeys += New-Object Parserkey ("DropProcedureStatement", "Objects")
     $ParserKeys += New-Object Parserkey ("DropTableStatement", "Objects")
-
+    $ParserKeys += New-Object Parserkey ("MergeStatement", "MergeSpecification")
+    $ParserKeys += New-Object Parserkey ("DeclareVariableStatement", "Declarations")
+    
     $ParserKeys
 }
 
