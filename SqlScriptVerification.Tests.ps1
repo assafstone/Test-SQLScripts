@@ -1,11 +1,12 @@
 # Add items to the $verificationTests hashtable, in order to add tests. 
 # The hash's key is the Microsoft.SqlServer.TransactSql.ScriptDom.TSqlStatement descendant class we are checking, and the value is the Pester test assumption
 # If you add a statement-type and get a Parser Key missing warning, add it to the Get-SqlServerDomParserKeys function.
-$violations = 
+$violations = @(
     @{violation = 'AlterTableAlterColumnStatement'}, 
     @{violation = 'AlterTableDropTableElementStatement'}, 
     @{violation = 'DropTableStatement'}
-    
+)
+
 Describe "When migrating SQL schema changes to the database" {
     
     Import-Module $PSScriptRoot/Modules/SqlScriptParser/Get-SqlServerDomParserKeys.psm1
@@ -33,7 +34,7 @@ Describe "When migrating SQL schema changes to the database" {
     
     $statements = $results.Batches.Statements
    
-    It "The script shouldn't have a <violation> statement" -TestCases $violations {
+    It 'The script should not have a \<violation\> statement' -TestCases $violations {
         param ($violation)
         $found = $statements | Where-Object StatementType -Like $violation
     
